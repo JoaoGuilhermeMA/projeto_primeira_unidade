@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/pokemon.dart';
-import '../services/pokemon_service.dart';
+import '../domain/pokemon.dart';
+import '../data/network/client/pokemon_api_client.dart';
+import '../data/network/network_mapper.dart';
 
 class TelaPokedex extends StatefulWidget {
   const TelaPokedex({super.key});
@@ -12,8 +13,9 @@ class TelaPokedex extends StatefulWidget {
 class _TelaPokedexState extends State<TelaPokedex> {
   List<Pokemon> pokemons = [];
   bool isLoading = true;
-  final PokemonService pokemonService =
-      PokemonService('http://192.168.0.34:3000/pokemons');
+  final PokemonApiClient pokemonApiClient =
+      PokemonApiClient(baseUrl: 'http://192.168.0.34:3000');
+  final NetworkMapper networkMapper = NetworkMapper();
 
   @override
   void initState() {
@@ -23,9 +25,9 @@ class _TelaPokedexState extends State<TelaPokedex> {
 
   Future<void> fetchPokemons() async {
     try {
-      final pokemonList = await pokemonService.fetchPokemons();
+      final pokemonEntities = await pokemonApiClient.fetchPokemons();
       setState(() {
-        pokemons = pokemonList;
+        pokemons = networkMapper.toPokemons(pokemonEntities);
         isLoading = false;
       });
     } catch (error) {
@@ -40,10 +42,10 @@ class _TelaPokedexState extends State<TelaPokedex> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pokedex"),
+        title: const Text("Pokedex"),
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: pokemons.length,
               itemBuilder: (context, index) {
