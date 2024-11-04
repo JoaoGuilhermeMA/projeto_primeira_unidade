@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'screens/tela_inial.dart';
-import 'screens/tela_pokedex.dart';
-import 'screens/tela_encontro_diario.dart';
-import 'screens/tela_meus_pokemons.dart';
+import 'ui/tela_inial.dart';
+import 'ui/tela_pokedex.dart';
+import 'ui/tela_encontro_diario.dart';
+import 'ui/tela_meus_pokemons.dart';
 
 void main() {
   runApp(MyApp());
