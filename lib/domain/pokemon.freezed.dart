@@ -14,22 +14,13 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-Pokemon _$PokemonFromJson(Map<String, dynamic> json) {
-  return _Pokemon.fromJson(json);
-}
-
 /// @nodoc
 mixin _$Pokemon {
   int get id => throw _privateConstructorUsedError;
-  String get nameEnglish => throw _privateConstructorUsedError;
-  String get nameJapanese => throw _privateConstructorUsedError;
-  String get nameChinese => throw _privateConstructorUsedError;
-  String get nameFrench => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
   List<String> get type => throw _privateConstructorUsedError;
-  Map<String, int> get baseStats => throw _privateConstructorUsedError;
-
-  /// Serializes this Pokemon to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, int> get base => throw _privateConstructorUsedError;
+  String get imagem => throw _privateConstructorUsedError;
 
   /// Create a copy of Pokemon
   /// with the given fields replaced by the non-null parameter values.
@@ -44,12 +35,10 @@ abstract class $PokemonCopyWith<$Res> {
   @useResult
   $Res call(
       {int id,
-      String nameEnglish,
-      String nameJapanese,
-      String nameChinese,
-      String nameFrench,
+      String name,
       List<String> type,
-      Map<String, int> baseStats});
+      Map<String, int> base,
+      String imagem});
 }
 
 /// @nodoc
@@ -68,42 +57,32 @@ class _$PokemonCopyWithImpl<$Res, $Val extends Pokemon>
   @override
   $Res call({
     Object? id = null,
-    Object? nameEnglish = null,
-    Object? nameJapanese = null,
-    Object? nameChinese = null,
-    Object? nameFrench = null,
+    Object? name = null,
     Object? type = null,
-    Object? baseStats = null,
+    Object? base = null,
+    Object? imagem = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      nameEnglish: null == nameEnglish
-          ? _value.nameEnglish
-          : nameEnglish // ignore: cast_nullable_to_non_nullable
-              as String,
-      nameJapanese: null == nameJapanese
-          ? _value.nameJapanese
-          : nameJapanese // ignore: cast_nullable_to_non_nullable
-              as String,
-      nameChinese: null == nameChinese
-          ? _value.nameChinese
-          : nameChinese // ignore: cast_nullable_to_non_nullable
-              as String,
-      nameFrench: null == nameFrench
-          ? _value.nameFrench
-          : nameFrench // ignore: cast_nullable_to_non_nullable
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      baseStats: null == baseStats
-          ? _value.baseStats
-          : baseStats // ignore: cast_nullable_to_non_nullable
+      base: null == base
+          ? _value.base
+          : base // ignore: cast_nullable_to_non_nullable
               as Map<String, int>,
+      imagem: null == imagem
+          ? _value.imagem
+          : imagem // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -117,12 +96,10 @@ abstract class _$$PokemonImplCopyWith<$Res> implements $PokemonCopyWith<$Res> {
   @useResult
   $Res call(
       {int id,
-      String nameEnglish,
-      String nameJapanese,
-      String nameChinese,
-      String nameFrench,
+      String name,
       List<String> type,
-      Map<String, int> baseStats});
+      Map<String, int> base,
+      String imagem});
 }
 
 /// @nodoc
@@ -139,73 +116,52 @@ class __$$PokemonImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? nameEnglish = null,
-    Object? nameJapanese = null,
-    Object? nameChinese = null,
-    Object? nameFrench = null,
+    Object? name = null,
     Object? type = null,
-    Object? baseStats = null,
+    Object? base = null,
+    Object? imagem = null,
   }) {
     return _then(_$PokemonImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      nameEnglish: null == nameEnglish
-          ? _value.nameEnglish
-          : nameEnglish // ignore: cast_nullable_to_non_nullable
-              as String,
-      nameJapanese: null == nameJapanese
-          ? _value.nameJapanese
-          : nameJapanese // ignore: cast_nullable_to_non_nullable
-              as String,
-      nameChinese: null == nameChinese
-          ? _value.nameChinese
-          : nameChinese // ignore: cast_nullable_to_non_nullable
-              as String,
-      nameFrench: null == nameFrench
-          ? _value.nameFrench
-          : nameFrench // ignore: cast_nullable_to_non_nullable
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
       type: null == type
           ? _value._type
           : type // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      baseStats: null == baseStats
-          ? _value._baseStats
-          : baseStats // ignore: cast_nullable_to_non_nullable
+      base: null == base
+          ? _value._base
+          : base // ignore: cast_nullable_to_non_nullable
               as Map<String, int>,
+      imagem: null == imagem
+          ? _value.imagem
+          : imagem // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$PokemonImpl implements _Pokemon {
   const _$PokemonImpl(
       {required this.id,
-      required this.nameEnglish,
-      required this.nameJapanese,
-      required this.nameChinese,
-      required this.nameFrench,
+      required this.name,
       required final List<String> type,
-      required final Map<String, int> baseStats})
+      required final Map<String, int> base,
+      required this.imagem})
       : _type = type,
-        _baseStats = baseStats;
-
-  factory _$PokemonImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PokemonImplFromJson(json);
+        _base = base;
 
   @override
   final int id;
   @override
-  final String nameEnglish;
-  @override
-  final String nameJapanese;
-  @override
-  final String nameChinese;
-  @override
-  final String nameFrench;
+  final String name;
   final List<String> _type;
   @override
   List<String> get type {
@@ -214,17 +170,20 @@ class _$PokemonImpl implements _Pokemon {
     return EqualUnmodifiableListView(_type);
   }
 
-  final Map<String, int> _baseStats;
+  final Map<String, int> _base;
   @override
-  Map<String, int> get baseStats {
-    if (_baseStats is EqualUnmodifiableMapView) return _baseStats;
+  Map<String, int> get base {
+    if (_base is EqualUnmodifiableMapView) return _base;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_baseStats);
+    return EqualUnmodifiableMapView(_base);
   }
 
   @override
+  final String imagem;
+
+  @override
   String toString() {
-    return 'Pokemon(id: $id, nameEnglish: $nameEnglish, nameJapanese: $nameJapanese, nameChinese: $nameChinese, nameFrench: $nameFrench, type: $type, baseStats: $baseStats)';
+    return 'Pokemon(id: $id, name: $name, type: $type, base: $base, imagem: $imagem)';
   }
 
   @override
@@ -233,30 +192,20 @@ class _$PokemonImpl implements _Pokemon {
         (other.runtimeType == runtimeType &&
             other is _$PokemonImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.nameEnglish, nameEnglish) ||
-                other.nameEnglish == nameEnglish) &&
-            (identical(other.nameJapanese, nameJapanese) ||
-                other.nameJapanese == nameJapanese) &&
-            (identical(other.nameChinese, nameChinese) ||
-                other.nameChinese == nameChinese) &&
-            (identical(other.nameFrench, nameFrench) ||
-                other.nameFrench == nameFrench) &&
+            (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other._type, _type) &&
-            const DeepCollectionEquality()
-                .equals(other._baseStats, _baseStats));
+            const DeepCollectionEquality().equals(other._base, _base) &&
+            (identical(other.imagem, imagem) || other.imagem == imagem));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
       id,
-      nameEnglish,
-      nameJapanese,
-      nameChinese,
-      nameFrench,
+      name,
       const DeepCollectionEquality().hash(_type),
-      const DeepCollectionEquality().hash(_baseStats));
+      const DeepCollectionEquality().hash(_base),
+      imagem);
 
   /// Create a copy of Pokemon
   /// with the given fields replaced by the non-null parameter values.
@@ -265,41 +214,26 @@ class _$PokemonImpl implements _Pokemon {
   @pragma('vm:prefer-inline')
   _$$PokemonImplCopyWith<_$PokemonImpl> get copyWith =>
       __$$PokemonImplCopyWithImpl<_$PokemonImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PokemonImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _Pokemon implements Pokemon {
   const factory _Pokemon(
       {required final int id,
-      required final String nameEnglish,
-      required final String nameJapanese,
-      required final String nameChinese,
-      required final String nameFrench,
+      required final String name,
       required final List<String> type,
-      required final Map<String, int> baseStats}) = _$PokemonImpl;
-
-  factory _Pokemon.fromJson(Map<String, dynamic> json) = _$PokemonImpl.fromJson;
+      required final Map<String, int> base,
+      required final String imagem}) = _$PokemonImpl;
 
   @override
   int get id;
   @override
-  String get nameEnglish;
-  @override
-  String get nameJapanese;
-  @override
-  String get nameChinese;
-  @override
-  String get nameFrench;
+  String get name;
   @override
   List<String> get type;
   @override
-  Map<String, int> get baseStats;
+  Map<String, int> get base;
+  @override
+  String get imagem;
 
   /// Create a copy of Pokemon
   /// with the given fields replaced by the non-null parameter values.

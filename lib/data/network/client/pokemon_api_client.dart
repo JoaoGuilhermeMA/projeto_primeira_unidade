@@ -18,7 +18,7 @@ class PokemonApiClient {
         message: response.statusMessage,
       );
     }
-    return (response.data as List)
+    return (response.data['pokedex'] as List)
         .map((json) => PokemonEntity.fromJson(json))
         .toList();
   }
