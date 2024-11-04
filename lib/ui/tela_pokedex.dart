@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import '../domain/pokemon.dart';
 import '../data/repository/pokemon_repositoy_impl.dart';
 import '../data/database/app_database.dart';
@@ -13,50 +14,46 @@ class TelaPokedex extends StatefulWidget {
 }
 
 class _TelaPokedexState extends State<TelaPokedex> {
-  List<Pokemon> pokemons = [];
-  bool isLoading = true;
-  String? errorMessage;
+  static const _pageSize = 20; // Tamanho da página (ajuste conforme necessário)
 
   late final PokemonRepositoryImpl pokemonRepository;
+  final PagingController<int, Pokemon> _pagingController =
+      PagingController(firstPageKey: 0);
 
   @override
   void initState() {
     super.initState();
     initializeRepository();
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
   }
 
   Future<void> initializeRepository() async {
-    // Instanciar o banco de dados e obter o PokemonDao e DatabaseMapper
     final database =
         await $FloorAppDatabase.databaseBuilder('pokemon_database.db').build();
     final pokemonDao = database.pokemonDao;
     final databaseMapper = DatabaseMapper();
-
-    // Inicializar o repositório com o dao e mapper
     pokemonRepository = PokemonRepositoryImpl(
       'http://192.168.0.34:3000/pokedex',
       pokemonDao,
       databaseMapper,
     );
-
-    fetchPokemons();
   }
 
-  Future<void> fetchPokemons() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+  Future<void> _fetchPage(int pageKey) async {
     try {
-      pokemons = await pokemonRepository.fetchPokemons();
+      final newPokemons =
+          await pokemonRepository.fetchPokemonsPaginated(pageKey, _pageSize);
+      final isLastPage = newPokemons.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newPokemons);
+      } else {
+        final nextPageKey = pageKey + newPokemons.length;
+        _pagingController.appendPage(newPokemons, nextPageKey);
+      }
     } catch (error) {
-      print('Erro ao carregar pokémons: $error');
-      setState(() {
-        errorMessage =
-            'Erro ao carregar os dados. Mostrando dados em cache, se disponíveis.';
-      });
-    } finally {
-      setState(() => isLoading = false);
+      _pagingController.error = error;
     }
   }
 
@@ -66,48 +63,36 @@ class _TelaPokedexState extends State<TelaPokedex> {
       appBar: AppBar(
         title: const Text("Pokedex"),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(errorMessage!),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: fetchPokemons,
-                        child: const Text("Tentar novamente"),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: pokemons.length,
-                  itemBuilder: (context, index) {
-                    final pokemon = pokemons[index];
-                    return ListTile(
-                      leading: Image.network(
-                        pokemon.imagem,
-                        width: 50,
-                        height: 50,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.error),
-                      ),
-                      title: Text(pokemon.name),
-                      subtitle: Text("Tipo: ${pokemon.type.join(", ")}"),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                PokemonDetailScreen(pokemon: pokemon),
-                          ),
-                        );
-                      },
-                    );
-                  },
+      body: PagedListView<int, Pokemon>(
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<Pokemon>(
+          itemBuilder: (context, pokemon, index) => ListTile(
+            leading: Image.network(
+              pokemon.imagem,
+              width: 50,
+              height: 50,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.error),
+            ),
+            title: Text(pokemon.name),
+            subtitle: Text("Tipo: ${pokemon.type.join(", ")}"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PokemonDetailScreen(pokemon: pokemon),
                 ),
+              );
+            },
+          ),
+        ),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
   }
 }
