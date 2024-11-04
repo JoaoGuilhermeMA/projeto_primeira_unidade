@@ -1,29 +1,25 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+class Pokemon {
+  final int id;
+  final String name;
+  final List<String> type; // Lista de tipos
+  final Map<String, int> base; // Mapa de estatísticas
+  final String imagem;
 
-part 'pokemon.freezed.dart';
-
-@freezed
-class Pokemon with _$Pokemon {
-  const factory Pokemon({
-    required int id,
-    required String name,
-    required List<String> type,
-    required Map<String, int> base,
-    required String imagem,
-  }) = _Pokemon;
+  Pokemon({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.base,
+    required this.imagem,
+  });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
     return Pokemon(
-      id: json['id'] as int,
-      name: json['name'] ?? 'Unknown',
-      type: (json['type'] as List<dynamic>).map((e) => e as String).toList(),
-      base: (json['base'] as Map<String, dynamic>).map(
-        (key, value) => MapEntry(
-          key,
-          value is int ? value : int.tryParse(value.toString()) ?? 0,
-        ),
-      ),
-      imagem: json['imagem'] ?? '',
+      id: json['id'],
+      name: json['name'],
+      type: List<String>.from(json['type']), // Ou como necessário
+      base: Map<String, int>.from(json['base']), // Ou como necessário
+      imagem: json['imagem'], // Ou o que for apropriado
     );
   }
 }

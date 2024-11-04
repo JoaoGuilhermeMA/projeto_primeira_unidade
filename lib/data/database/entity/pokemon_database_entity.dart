@@ -1,15 +1,13 @@
-import 'package:json_annotation/json_annotation.dart';
-import '../dao/base_dao.dart';
 import 'dart:convert';
+import 'package:floor/floor.dart';
 
-part 'pokemon_database_entity.g.dart';
-
-@JsonSerializable()
+@entity
 class PokemonDatabaseEntity {
+  @primaryKey
   final int id;
   final String name;
-  final List<String> type;
-  final Map<String, int> base;
+  final String type; // Armazenado como JSON string
+  final String base; // Armazenado como JSON string
   final String imagem;
 
   PokemonDatabaseEntity({
@@ -20,17 +18,14 @@ class PokemonDatabaseEntity {
     required this.imagem,
   });
 
-  factory PokemonDatabaseEntity.fromJson(Map<String, dynamic> json) {
-    return PokemonDatabaseEntity(
-      id: json[PokemonDatabaseContract.idColumn] as int,
-      name: json[PokemonDatabaseContract.nameColumn] as String,
-      type: List<String>.from(jsonDecode(json[PokemonDatabaseContract
-          .typeColumn])), // Certifique-se de que isso está decodificando corretamente
-      base: Map<String, int>.from(jsonDecode(json[PokemonDatabaseContract
-          .baseColumn])), // Certifique-se de que isso está decodificando corretamente
-      imagem: json[PokemonDatabaseContract.imagemColumn] as String,
-    );
-  }
+  // Método para converter `type` de JSON string para lista
+  List<String> getTypeList() => List<String>.from(jsonDecode(type));
 
-  Map<String, dynamic> toJson() => _$PokemonDatabaseEntityToJson(this);
+  // Método para converter `base` de JSON string para mapa
+  Map<String, int> getBaseMap() => Map<String, int>.from(jsonDecode(base));
+
+  // Métodos para converter listas e mapas para JSON
+  static String typeToJson(List<String> typeList) => jsonEncode(typeList);
+
+  static String baseToJson(Map<String, int> baseMap) => jsonEncode(baseMap);
 }

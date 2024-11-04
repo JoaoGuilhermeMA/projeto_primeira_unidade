@@ -1,42 +1,26 @@
 import './entity/pokemon_database_entity.dart';
 import '../../domain/pokemon.dart';
-import '../../exceptions/mapper_exception.dart';
 
 class DatabaseMapper {
-  Pokemon toPokemon(PokemonDatabaseEntity entity) {
-    try {
-      return Pokemon(
-        id: entity.id,
-        name: entity.name,
-        type: entity.type,
-        base: entity.base,
-        imagem: entity.imagem,
-      );
-    } catch (e) {
-      throw MapperException<PokemonDatabaseEntity, Pokemon>(e.toString());
-    }
-  }
-
-  List<Pokemon> toPokemons(List<PokemonDatabaseEntity> entities) {
-    return entities.map((entity) => toPokemon(entity)).toList();
-  }
-
   PokemonDatabaseEntity toPokemonDatabaseEntity(Pokemon pokemon) {
-    try {
-      return PokemonDatabaseEntity(
-        id: pokemon.id,
-        name: pokemon.name,
-        type: pokemon.type,
-        base: pokemon.base,
-        imagem: pokemon.imagem,
-      );
-    } catch (e) {
-      throw MapperException<Pokemon, PokemonDatabaseEntity>(e.toString());
-    }
+    return PokemonDatabaseEntity(
+      id: pokemon.id,
+      name: pokemon.name,
+      type: PokemonDatabaseEntity.typeToJson(
+          pokemon.type), // Converte a lista para JSON
+      base: PokemonDatabaseEntity.baseToJson(
+          pokemon.base), // Converte o mapa para JSON
+      imagem: pokemon.imagem, // Se houver uma imagem
+    );
   }
 
-  List<PokemonDatabaseEntity> toPokemonDatabaseEntities(
-      List<Pokemon> pokemons) {
-    return pokemons.map((pokemon) => toPokemonDatabaseEntity(pokemon)).toList();
+  Pokemon toPokemon(PokemonDatabaseEntity entity) {
+    return Pokemon(
+      id: entity.id,
+      name: entity.name,
+      type: entity.getTypeList(), // Converte JSON para lista
+      base: entity.getBaseMap(), // Converte JSON para mapa
+      imagem: entity.imagem,
+    );
   }
 }

@@ -16,20 +16,15 @@ class PokemonRepositoryImpl implements PokemonRepository {
   @override
   Future<List<Pokemon>> fetchPokemons() async {
     try {
-      // Tentar buscar os dados da API
       final res = await http.get(Uri.parse(baseUrl));
       if (res.statusCode == HttpStatus.ok) {
         final Map<String, dynamic> jsonResponse = jsonDecode(res.body);
-
         final List<dynamic> pokemonsJson =
-            jsonResponse['pokedex'] as List<dynamic>; // Acessando 'pokedex'
-
-        // print('Pokémons da API: $pokemonsJson'); // Log dos dados recebidos
+            jsonResponse['pokedex'] as List<dynamic>;
 
         final pokemons =
             pokemonsJson.map((json) => Pokemon.fromJson(json)).toList();
 
-        // Salvar no banco de dados
         await pokemonDao.deleteAll(); // Limpa a tabela
         await pokemonDao.insertAll(
           pokemons.map(databaseMapper.toPokemonDatabaseEntity).toList(),
@@ -43,7 +38,8 @@ class PokemonRepositoryImpl implements PokemonRepository {
       print('Erro ao pegar pokémons da API: $error');
 
       // Fallback para o banco de dados se houver erro
-      final pokemonEntities = await pokemonDao.selectAll();
+      final pokemonEntities = await pokemonDao
+          .selectAllPokemons(); // Alterado para selectAllPokemons
       if (pokemonEntities.isEmpty) {
         print('Nenhum Pokémon encontrado no banco de dados.');
       } else {

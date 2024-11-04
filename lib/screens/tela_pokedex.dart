@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../domain/pokemon.dart';
 import '../data/repository/pokemon_repositoy_impl.dart';
-import '../data/database/dao/pokemon_dao.dart';
+import '../data/database/app_database.dart';
 import '../data/database/database_mapper.dart';
-import './pokemon_detalhes.dart'; // Importe a tela de detalhes
+import './pokemon_detalhes.dart';
 
 class TelaPokedex extends StatefulWidget {
   const TelaPokedex({super.key});
@@ -17,16 +17,28 @@ class _TelaPokedexState extends State<TelaPokedex> {
   bool isLoading = true;
   String? errorMessage;
 
-  // Instanciar PokemonRepositoryImpl com PokemonDao e DatabaseMapper
-  final PokemonRepositoryImpl pokemonRepository = PokemonRepositoryImpl(
-    'http://192.168.0.34:3000/pokedex',
-    PokemonDao(),
-    DatabaseMapper(),
-  );
+  late final PokemonRepositoryImpl pokemonRepository;
 
   @override
   void initState() {
     super.initState();
+    initializeRepository();
+  }
+
+  Future<void> initializeRepository() async {
+    // Instanciar o banco de dados e obter o PokemonDao e DatabaseMapper
+    final database =
+        await $FloorAppDatabase.databaseBuilder('pokemon_database.db').build();
+    final pokemonDao = database.pokemonDao;
+    final databaseMapper = DatabaseMapper();
+
+    // Inicializar o repositório com o dao e mapper
+    pokemonRepository = PokemonRepositoryImpl(
+      'http://192.168.0.34:3000/pokedex',
+      pokemonDao,
+      databaseMapper,
+    );
+
     fetchPokemons();
   }
 
@@ -85,7 +97,6 @@ class _TelaPokedexState extends State<TelaPokedex> {
                       title: Text(pokemon.name),
                       subtitle: Text("Tipo: ${pokemon.type.join(", ")}"),
                       onTap: () {
-                        // Navegar para a tela de detalhes ao clicar
                         Navigator.push(
                           context,
                           MaterialPageRoute(
