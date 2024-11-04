@@ -174,6 +174,22 @@ class _$PokemonDao extends PokemonDao {
   }
 
   @override
+  Future<List<PokemonDatabaseEntity>> selectPokemonsPaginated(
+    int limit,
+    int offset,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM PokemonDatabaseEntity LIMIT ?1 OFFSET ?2',
+        mapper: (Map<String, Object?> row) => PokemonDatabaseEntity(
+            id: row['id'] as int,
+            name: row['name'] as String,
+            type: row['type'] as String,
+            base: row['base'] as String,
+            imagem: row['imagem'] as String),
+        arguments: [limit, offset]);
+  }
+
+  @override
   Future<void> insertAll(List<PokemonDatabaseEntity> entities) async {
     await _pokemonDatabaseEntityInsertionAdapter.insertList(
         entities, OnConflictStrategy.replace);
