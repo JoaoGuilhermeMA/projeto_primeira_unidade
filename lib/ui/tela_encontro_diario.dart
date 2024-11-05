@@ -6,6 +6,7 @@ import '../domain/pokemon.dart';
 import '../data/database/dao/equipe_dao.dart'; // Importar o EquipeDao
 import '../data/database/entity/equipe_entity.dart'; // Importar a entidade EquipeEntity
 import '../ui/widget/button_widget.dart';
+import '../ui/widget/type_chip.dart'; // Importar o TypeChip
 
 class TelaEncontroDiario extends StatefulWidget {
   const TelaEncontroDiario({super.key});
@@ -114,6 +115,13 @@ class _TelaEncontroDiarioState extends State<TelaEncontroDiario> {
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8.0,
+                        children: pokemon.type
+                            .map((type) => TypeChip(type: type))
+                            .toList(),
                       ),
                       const SizedBox(height: 8),
                       Text("HP: ${pokemon.base['HP'] ?? 0}",

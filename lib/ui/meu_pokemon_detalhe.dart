@@ -6,9 +6,10 @@ import '../data/database/dao/pokemon_dao.dart'; // Importar o PokemonDao
 import '../data/database/database_mapper.dart'; // Importar o mapeador, se necessário
 import '../domain/pokemon.dart'; // Importar o modelo Pokémon
 import '../ui/widget/button_widget.dart';
+import '../ui/widget/type_chip.dart'; // Importe o TypeChip
 
 class PokemonDetailReleaseScreen extends StatelessWidget {
-  final Pokemon pokemon; // Recebe o Pokémon como parâmetro
+  final Pokemon pokemon;
 
   const PokemonDetailReleaseScreen({Key? key, required this.pokemon})
       : super(key: key);
@@ -55,10 +56,16 @@ class PokemonDetailReleaseScreen extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Text('Tipos: ${pokemon.type.join(', ')}',
-                    style: const TextStyle(fontSize: 18)),
+                const Text('Tipos:', style: TextStyle(fontSize: 18)),
+                Wrap(
+                  spacing: 8.0,
+                  children: pokemon.type
+                      .map((type) =>
+                          TypeChip(type: type)) // Usa o TypeChip para cada tipo
+                      .toList(),
+                ),
                 const SizedBox(height: 8),
-                Text('Imagem:', style: const TextStyle(fontSize: 18)),
+                const Text('Imagem:', style: TextStyle(fontSize: 18)),
                 Image.network(pokemon.imagem),
                 const SizedBox(height: 8),
                 const Text('Atributos:',
