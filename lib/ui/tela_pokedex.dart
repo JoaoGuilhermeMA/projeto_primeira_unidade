@@ -15,6 +15,8 @@ class TelaPokedex extends StatefulWidget {
 
 class _TelaPokedexState extends State<TelaPokedex> {
   late ScrollController _scrollController;
+  int _pageKey = 0;
+  final int _pageSize = 20;
 
   @override
   void initState() {
@@ -32,7 +34,12 @@ class _TelaPokedexState extends State<TelaPokedex> {
 
   Future<void> _fetchInitialPage() async {
     final provider = Provider.of<PokemonProvider>(context, listen: false);
-    await provider.fetchPokemons();
+    final pokemons = await provider.fetchPokemonsPaginated(_pageKey, _pageSize);
+    if (pokemons.isNotEmpty) {
+      setState(() {
+        provider.pokemons = pokemons; // Carrega os Pokémons da primeira página
+      });
+    }
   }
 
   void _onScroll() {
@@ -47,7 +54,14 @@ class _TelaPokedexState extends State<TelaPokedex> {
 
   Future<void> _loadMoreData() async {
     final provider = Provider.of<PokemonProvider>(context, listen: false);
-    await provider.fetchMorePokemons();
+    _pageKey++; // Atualiza a chave para carregar a próxima página
+    final morePokemons =
+        await provider.fetchPokemonsPaginated(_pageKey, _pageSize);
+    if (morePokemons.isNotEmpty) {
+      setState(() {
+        provider.pokemons.addAll(morePokemons); // Adiciona os novos Pokémons
+      });
+    }
   }
 
   @override

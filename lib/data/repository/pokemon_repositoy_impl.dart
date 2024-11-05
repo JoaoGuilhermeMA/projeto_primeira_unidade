@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:projeto_primeira_unidade/data/database/entity/pokemon_database_entity.dart';
 import '../../domain/pokemon.dart';
 import '../repository/pokemon_repository.dart';
 import '../database/dao/pokemon_dao.dart';
@@ -12,6 +13,11 @@ class PokemonRepositoryImpl implements PokemonRepository {
   final DatabaseMapper databaseMapper;
 
   PokemonRepositoryImpl(this.baseUrl, this.pokemonDao, this.databaseMapper);
+
+  Future<List<PokemonDatabaseEntity>> fetchPokemonsPaginated(
+      int limit, int offset) async {
+    return await pokemonDao.selectPokemonsPaginated(limit, offset);
+  }
 
   @override
   Future<List<Pokemon>> fetchPokemons() async {
