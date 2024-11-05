@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../data/database/app_database.dart';
-import '../data/database/dao/equipe_dao.dart';
-import '../data/database/dao/pokemon_dao.dart'; // Importar o PokemonDao
-import '../data/database/database_mapper.dart'; // Importe o mapeador, se necessário
-import '../domain/pokemon.dart'; // Importar o modelo Pokémon
-import 'meu_pokemon_detalhe.dart'; // Importar a tela de detalhes com liberação
+import '../domain/pokemon.dart';
+import './widget/pokemon_item_list.dart';
+import 'meu_pokemon_detalhe.dart';
+import '../data/database/database_mapper.dart';
 
 class TelaMeusPokemons extends StatefulWidget {
   const TelaMeusPokemons({super.key});
@@ -26,20 +25,16 @@ class _TelaMeusPokemonsState extends State<TelaMeusPokemons> {
     final database =
         await $FloorAppDatabase.databaseBuilder('pokemon_database.db').build();
     final equipeDao = database.equipeDao;
-    final pokemonDao = database.pokemonDao; // Instanciar o PokemonDao
+    final pokemonDao = database.pokemonDao;
 
-    final capturados =
-        await equipeDao.findAllPokemons(); // Busca todos os Pokémon da equipe
+    final capturados = await equipeDao.findAllPokemons();
     final List<Pokemon> pokemons = [];
 
-    // Para cada Pokémon capturado, buscar as informações correspondentes na tabela pokemon
     for (final equipe in capturados) {
-      final pokemonEntity = await pokemonDao
-          .findPokemonById(equipe.pokemonId); // Busca o Pokémon pelo ID
+      final pokemonEntity = await pokemonDao.findPokemonById(equipe.pokemonId);
       if (pokemonEntity != null) {
         final databaseMapper = DatabaseMapper();
-        final pokemon = databaseMapper
-            .toPokemon(pokemonEntity); // Converte a entidade para o modelo
+        final pokemon = databaseMapper.toPokemon(pokemonEntity);
         pokemons.add(pokemon);
       }
     }
@@ -65,16 +60,8 @@ class _TelaMeusPokemonsState extends State<TelaMeusPokemons> {
               itemCount: pokemons.length,
               itemBuilder: (context, index) {
                 final pokemon = pokemons[index];
-                return ListTile(
-                  title: Text(pokemon.name),
-                  subtitle: Text("ID: ${pokemon.id}"),
-                  leading: Image.network(
-                    pokemon.imagem,
-                    width: 50,
-                    height: 50,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.error, size: 50),
-                  ),
+                return PokemonListItem(
+                  pokemon: pokemon,
                   onTap: () async {
                     await Navigator.push(
                       context,

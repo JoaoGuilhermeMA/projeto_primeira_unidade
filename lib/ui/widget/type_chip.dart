@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // Importar o pacote flutter_svg
 
 class TypeChip extends StatelessWidget {
   final String type;
@@ -8,51 +9,50 @@ class TypeChip extends StatelessWidget {
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
       case 'poison':
-        return Colors.purple; // Cor específica para o tipo Poison
+        return Color(0xFFA552CC);
       case 'grass':
-        return Colors.green; // Cor para tipo Grass
+        return Color(0xFF62B957);
       case 'fire':
-        return Colors.red; // Cor para tipo Fire
+        return Color(0xFFFD7D24);
       case 'bug':
-        return Color.fromRGBO(181, 255, 3, 100);
+        return Color(0xFF8CB230);
       case 'electric':
-        return Colors.yellow;
+        return Color(0xFFEED535);
       case 'ground':
-        return Color.fromRGBO(205, 161, 3, 100);
+        return Color(0xFFDD7748);
       case 'fairy':
-        return Colors.pinkAccent;
+        return Color(0xFFED6EC7);
       case 'flying':
-        return const Color.fromARGB(228, 96, 231, 255);
+        return Color(0xFF748FC9);
       case 'water':
-        return Colors.blue;
+        return Color(0xFF4A90DA);
       case 'fighting':
-        return const Color.fromARGB(255, 78, 5, 0);
+        return Color(0xFFD04164);
       case 'rock':
-        return const Color.fromARGB(255, 51, 43, 0);
+        return Color(0xFFBAAB82);
       case 'psychic':
-        return const Color.fromARGB(255, 253, 128, 232);
+        return Color(0xFFEA5D60);
       case 'steel':
-        return const Color.fromARGB(255, 71, 71, 71);
+        return Color(0xFF417D9A);
       case 'ice':
-        return const Color.fromARGB(255, 112, 210, 255);
+        return Color(0xFF61CEC0);
       case 'dragon':
-        return const Color.fromARGB(255, 77, 1, 255);
+        return Color(0xFF0F6AC0);
       case 'dark':
-        return const Color.fromARGB(255, 0, 0, 0);
+        return Color(0xFF58575F);
       case 'ghost':
-        return const Color.fromARGB(255, 148, 82, 255);
+        return Color(0xFF556AAE);
       default:
-        return const Color.fromARGB(158, 255, 152, 69); // Cor padrão
+        return Color(0xFF9DA0AA); // Cor padrão
     }
   }
 
   Color _getTextColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'bug':
-        return Colors.white;
-      default:
-        return Colors.white; // Cor padrão
-    }
+    return Colors.white;
+  }
+
+  String _getTypeIconPath(String type) {
+    return 'assets/icons/$type.svg'; // Converte o tipo para minúsculas
   }
 
   @override
@@ -63,12 +63,32 @@ class TypeChip extends StatelessWidget {
         color: _getTypeColor(type),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        type.toUpperCase(),
-        style: TextStyle(
-          color: _getTextColor(type), // Remova `const` aqui
-          fontWeight: FontWeight.bold,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Transform.scale(
+            scale: 1, // Ajuste a escala conforme necessário
+            child: SvgPicture.asset(
+              _getTypeIconPath(type), // Use o caminho do ícone SVG
+              width: 16, // Mantenha o tamanho original ou defina para null
+              height: 16, // Mantenha o tamanho original ou defina para null
+              placeholderBuilder: (BuildContext context) => const SizedBox(
+                width: 24,
+                height: 24,
+                child:
+                    CircularProgressIndicator(), // Opcional: placeholder enquanto carrega
+              ),
+            ),
+          ),
+          const SizedBox(width: 4), // Espaçamento entre a imagem e o texto
+          Text(
+            type.toUpperCase(),
+            style: TextStyle(
+              color: _getTextColor(type),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -45,6 +45,12 @@ dependencies:
   infinite_scroll_pagination: ^4.0.0
   provider: ^6.1.2
   cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.13
+  flutter_launcher_icons: ^0.14.1
+
+flutter_icons:
+  android: true
+  background_color: "#ADD8E6" # Cor de fundo (preto)
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +80,26 @@ flutter:
   assets:
     - assets/tela_fundo_pokedex.jpg
     - assets/pokemon_diario.jpg
+    - assets/pokemon_diario.jpg
+    - assets/icons/Bug.svg
+    - assets/icons/Dark.svg
+    - assets/icons/Dragon.svg
+    - assets/icons/Electric.svg
+    - assets/icons/Fairy.svg
+    - assets/icons/Fighting.svg
+    - assets/icons/Fire.svg
+    - assets/icons/Flying.svg
+    - assets/icons/Ghost.svg
+    - assets/icons/Grass.svg
+    - assets/icons/Ground.svg
+    - assets/icons/Ice.svg
+    - assets/icons/Normal.svg
+    - assets/icons/Poison.svg
+    - assets/icons/Psychic.svg
+    - assets/icons/Rock.svg
+    - assets/icons/Steel.svg
+    - assets/icons/Water.svg
+    - assets/icons/Pokeball.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

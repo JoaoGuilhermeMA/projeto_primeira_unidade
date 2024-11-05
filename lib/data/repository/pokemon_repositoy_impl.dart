@@ -21,6 +21,7 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
   @override
   Future<List<Pokemon>> fetchPokemons() async {
+    print("entrei aqui");
     try {
       final res = await http.get(Uri.parse(baseUrl));
       if (res.statusCode == HttpStatus.ok) {

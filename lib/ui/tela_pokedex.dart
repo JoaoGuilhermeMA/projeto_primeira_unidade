@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../domain/pokemon.dart';
 import '../providers/pokemon_provider.dart';
-import './widget/type_chip.dart';
+import './widget/pokemon_item_list.dart';
 import 'pokemon_detalhes.dart';
 
 class TelaPokedex extends StatefulWidget {
@@ -21,8 +20,10 @@ class _TelaPokedexState extends State<TelaPokedex> {
   @override
   void initState() {
     super.initState();
-    _fetchInitialPage();
     _scrollController = ScrollController()..addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchInitialPage();
+    });
   }
 
   @override
@@ -34,12 +35,9 @@ class _TelaPokedexState extends State<TelaPokedex> {
 
   Future<void> _fetchInitialPage() async {
     final provider = Provider.of<PokemonProvider>(context, listen: false);
-    final pokemons = await provider.fetchPokemonsPaginated(_pageKey, _pageSize);
-    if (pokemons.isNotEmpty) {
-      setState(() {
-        provider.pokemons = pokemons; // Carrega os Pokémons da primeira página
-      });
-    }
+    print("Fetching initial data from API...");
+    await provider
+        .fetchAllPokemons(); // Chama a API para buscar todos os Pokémons
   }
 
   void _onScroll() {
@@ -54,14 +52,9 @@ class _TelaPokedexState extends State<TelaPokedex> {
 
   Future<void> _loadMoreData() async {
     final provider = Provider.of<PokemonProvider>(context, listen: false);
-    _pageKey++; // Atualiza a chave para carregar a próxima página
-    final morePokemons =
-        await provider.fetchPokemonsPaginated(_pageKey, _pageSize);
-    if (morePokemons.isNotEmpty) {
-      setState(() {
-        provider.pokemons.addAll(morePokemons); // Adiciona os novos Pokémons
-      });
-    }
+    _pageKey++;
+    print("Loading more data from API with offset $_pageKey...");
+    await provider.fetchPokemonsPaginated(_pageKey, _pageSize);
   }
 
   @override
@@ -83,23 +76,8 @@ class _TelaPokedexState extends State<TelaPokedex> {
                   itemBuilder: (context, index) {
                     if (index < provider.pokemons.length) {
                       final pokemon = provider.pokemons[index];
-                      return ListTile(
-                        leading: CachedNetworkImage(
-                          imageUrl: pokemon.imagem,
-                          width: 50,
-                          height: 50,
-                          placeholder: (context, url) =>
-                              const CircularProgressIndicator(),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
-                        ),
-                        title: Text(pokemon.name),
-                        subtitle: Wrap(
-                          spacing: 8,
-                          children: pokemon.type
-                              .map((type) => TypeChip(type: type))
-                              .toList(),
-                        ),
+                      return PokemonListItem(
+                        pokemon: pokemon,
                         onTap: () {
                           Navigator.push(
                             context,

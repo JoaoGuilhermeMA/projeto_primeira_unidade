@@ -6,8 +6,8 @@ class PokemonDatabaseEntity {
   @primaryKey
   final int id;
   final String name;
-  final String type; // Armazenado como JSON string
-  final String base; // Armazenado como JSON string
+  final String type;
+  final String base;
   final String imagem;
 
   PokemonDatabaseEntity({
