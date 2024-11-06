@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_primeira_unidade/data/database/dao/equipe_dao.dart';
+import 'package:projeto_primeira_unidade/data/database/entity/equipe_entity.dart';
 import 'package:projeto_primeira_unidade/data/repository/pokemon_repositoy_impl.dart';
-import 'dart:math'; // Importar a biblioteca random
-import 'package:provider/provider.dart'; // Importar o provider
+import 'dart:math';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/pokemon.dart';
-import '../data/database/dao/equipe_dao.dart'; // Importar o EquipeDao
-import '../data/database/entity/equipe_entity.dart'; // Importar a entidade EquipeEntity
 import '../ui/widget/button_widget.dart';
-import '../ui/widget/type_chip.dart'; // Importar o TypeChip
+import '../ui/widget/type_chip.dart';
 
 class TelaEncontroDiario extends StatefulWidget {
   const TelaEncontroDiario({super.key});
@@ -16,33 +17,57 @@ class TelaEncontroDiario extends StatefulWidget {
 }
 
 class _TelaEncontroDiarioState extends State<TelaEncontroDiario> {
-  late Future<Pokemon> _randomPokemonFuture;
+  Future<Pokemon>? _randomPokemonFuture;
+  late SharedPreferences _prefs;
+  static const String _pokemonKey = 'dailyPokemon';
+  static const String _dateKey = 'dailyPokemonDate';
 
   @override
   void initState() {
     super.initState();
-    _randomPokemonFuture = fetchRandomPokemon();
+    _initializePrefs();
   }
 
-  // Função para buscar Pokémon aleatório usando o repositório
-  Future<Pokemon> fetchRandomPokemon() async {
-    final repository =
-        Provider.of<PokemonRepositoryImpl>(context, listen: false);
-    final pokemons = await repository.getPokemons(
-        page: 1, limit: 809); // Pegue mais de 1 para randomizar
+  Future<void> _initializePrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _randomPokemonFuture = fetchRandomPokemon();
+    });
+  }
 
-    if (pokemons.isEmpty) {
-      throw Exception('Nenhum Pokémon encontrado no repositório.');
+  Future<Pokemon> fetchRandomPokemon() async {
+    final today = DateTime.now().toString().substring(0, 10);
+    final storedDate = _prefs.getString(_dateKey);
+    final storedPokemonId = _prefs.getInt(_pokemonKey);
+
+    if (storedDate == today && storedPokemonId != null) {
+      final repository =
+          Provider.of<PokemonRepositoryImpl>(context, listen: false);
+      final pokemons = await repository.getPokemons(page: 1, limit: 809);
+      final cachedPokemon = pokemons.firstWhere((p) => p.id == storedPokemonId);
+      return cachedPokemon;
     }
 
-    // Escolhe aleatoriamente um Pokémon da lista
+    final repository =
+        Provider.of<PokemonRepositoryImpl>(context, listen: false);
+    final pokemons = await repository.getPokemons(page: 1, limit: 809);
     final randomIndex = Random().nextInt(pokemons.length);
-    return pokemons[randomIndex];
+    final randomPokemon = pokemons[randomIndex];
+
+    await _prefs.setString(_dateKey, today);
+    await _prefs.setInt(_pokemonKey, randomPokemon.id);
+
+    return randomPokemon;
   }
 
-  // Função para capturar Pokémon e adicioná-lo à equipe
   Future<void> capturePokemon(Pokemon pokemon) async {
-    // Acessa o EquipeDao através do Provider
+    final captured = _prefs.getBool('captured_${pokemon.id}') ?? false;
+    if (captured) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Este Pokémon já foi capturado hoje!")),
+      );
+      return;
+    }
     final equipeDao = Provider.of<EquipeDao>(context, listen: false);
 
     // Verificar a quantidade de Pokémon na equipe
@@ -63,11 +88,10 @@ class _TelaEncontroDiarioState extends State<TelaEncontroDiario> {
 
     // Inserir no banco de dados
     await equipeDao.insertPokemon(equipeEntity);
+    _prefs.setBool('captured_${pokemon.id}', true);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Pokémon capturado e salvo na equipe!")),
+      const SnackBar(content: Text("Pokémon capturado com sucesso!")),
     );
-    Navigator.pop(context); // Voltar para a tela anterior
-    return;
   }
 
   @override
@@ -78,14 +102,12 @@ class _TelaEncontroDiarioState extends State<TelaEncontroDiario> {
       ),
       body: Stack(
         children: [
-          // Background image
           Image.asset(
             'assets/pokemon_diario.jpg',
-            fit: BoxFit.cover, // Ensures the image covers the entire screen
+            fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
           ),
-          // Centered content
           Center(
             child: FutureBuilder<Pokemon>(
               future: _randomPokemonFuture,
@@ -110,9 +132,10 @@ class _TelaEncontroDiarioState extends State<TelaEncontroDiario> {
                       Text(
                         pokemon.name,
                         style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -121,34 +144,17 @@ class _TelaEncontroDiarioState extends State<TelaEncontroDiario> {
                             .map((type) => TypeChip(type: type))
                             .toList(),
                       ),
-                      const SizedBox(height: 8),
-                      Text("HP: ${pokemon.base['HP'] ?? 0}",
-                          style: const TextStyle(color: Colors.white)),
-                      Text("Attack: ${pokemon.base['Attack'] ?? 0}",
-                          style: const TextStyle(color: Colors.white)),
-                      Text("Defense: ${pokemon.base['Defense'] ?? 0}",
-                          style: const TextStyle(color: Colors.white)),
-                      Text("Sp. Attack: ${pokemon.base['Sp. Attack'] ?? 0}",
-                          style: const TextStyle(color: Colors.white)),
-                      Text("Sp. Defense: ${pokemon.base['Sp. Defense'] ?? 0}",
-                          style: const TextStyle(color: Colors.white)),
-                      Text("Speed: ${pokemon.base['Speed'] ?? 0}",
-                          style: const TextStyle(color: Colors.white)),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           CustomButton(
                             text: 'Capturar',
-                            onPressed: () {
-                              capturePokemon(pokemon);
-                            },
+                            onPressed: () => capturePokemon(pokemon),
                           ),
                           CustomButton(
                             text: 'Fugir',
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
+                            onPressed: () => Navigator.pop(context),
                           ),
                         ],
                       ),
