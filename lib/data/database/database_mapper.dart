@@ -23,4 +23,12 @@ class DatabaseMapper {
       imagem: entity.imagem,
     );
   }
+
+  List<Pokemon> toPokemons(List<PokemonDatabaseEntity> entities) {
+    final List<Pokemon> pokemons = [];
+    for (var PokemonEntity in entities) {
+      pokemons.add(toPokemon(PokemonEntity));
+    }
+    return pokemons;
+  }
 }

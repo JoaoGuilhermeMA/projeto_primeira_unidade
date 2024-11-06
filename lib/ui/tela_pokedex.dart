@@ -1,103 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
-import '../domain/pokemon.dart';
-import '../providers/pokemon_provider.dart';
+import 'package:projeto_primeira_unidade/domain/pokemon.dart';
+import 'package:projeto_primeira_unidade/data/repository/pokemon_repositoy_impl.dart';
 import './widget/pokemon_item_list.dart';
-import 'pokemon_detalhes.dart';
 
 class TelaPokedex extends StatefulWidget {
-  const TelaPokedex({super.key});
-
   @override
-  _TelaPokedexState createState() => _TelaPokedexState();
+  _PokemonListPageState createState() => _PokemonListPageState();
 }
 
-class _TelaPokedexState extends State<TelaPokedex> {
-  late ScrollController _scrollController;
-  int _pageKey = 0;
-  final int _pageSize = 20;
+class _PokemonListPageState extends State<TelaPokedex> {
+  static const _pageSize = 20;
+  final PagingController<int, Pokemon> _pagingController =
+      PagingController(firstPageKey: 1);
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController()..addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchInitialPage();
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPokemons(pageKey);
     });
   }
 
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
+  Future<void> _fetchPokemons(int pageKey) async {
+    try {
+      final repository =
+          Provider.of<PokemonRepositoryImpl>(context, listen: false);
+      final pokemons =
+          await repository.getPokemons(page: pageKey, limit: _pageSize);
 
-  Future<void> _fetchInitialPage() async {
-    final provider = Provider.of<PokemonProvider>(context, listen: false);
-    print("Fetching initial data from API...");
-    await provider
-        .fetchAllPokemons(); // Chama a API para buscar todos os Pokémons
-  }
-
-  void _onScroll() {
-    final provider = Provider.of<PokemonProvider>(context, listen: false);
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        !provider.isLastPage &&
-        !provider.isLoading) {
-      _loadMoreData();
+      final isLastPage = pokemons.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(pokemons);
+      } else {
+        final nextPageKey = pageKey + 1;
+        _pagingController.appendPage(pokemons, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
     }
-  }
-
-  Future<void> _loadMoreData() async {
-    final provider = Provider.of<PokemonProvider>(context, listen: false);
-    _pageKey++;
-    print("Loading more data from API with offset $_pageKey...");
-    await provider.fetchPokemonsPaginated(_pageKey, _pageSize);
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<PokemonProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pokedex"),
+        title: Text('Pokémon List'),
       ),
-      body: provider.isLoading && provider.pokemons.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : provider.pokemons.isEmpty
-              ? const Center(child: Text("Nenhum Pokémon encontrado."))
-              : ListView.builder(
-                  controller: _scrollController,
-                  itemCount:
-                      provider.pokemons.length + (provider.isLastPage ? 0 : 1),
-                  itemBuilder: (context, index) {
-                    if (index < provider.pokemons.length) {
-                      final pokemon = provider.pokemons[index];
-                      return PokemonListItem(
-                        pokemon: pokemon,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  PokemonDetailScreen(pokemon: pokemon),
-                            ),
-                          );
-                        },
-                      );
-                    } else {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-                  },
-                ),
+      body: PagedListView<int, Pokemon>(
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<Pokemon>(
+          itemBuilder: (context, pokemon, index) {
+            return PokemonListItem(
+              pokemon: pokemon,
+              onTap: () {
+                // Defina o que deve acontecer quando o Pokémon for clicado
+              },
+            );
+          },
+        ),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
   }
 }

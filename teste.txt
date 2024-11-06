@@ -1,0 +1,49 @@
+Future<List<PokemonDatabaseEntity>> fetchPokemonsPaginated(
+      int limit, int offset) async {
+    return await pokemonDao.selectPokemonsPaginated(limit, offset);
+  }
+
+  @override
+  Future<List<Pokemon>> fetchPokemons() async {
+    print("entrei aqui");
+    try {
+      final res = await http.get(Uri.parse(baseUrl));
+      if (res.statusCode == HttpStatus.ok) {
+        final Map<String, dynamic> jsonResponse = jsonDecode(res.body);
+        final List<dynamic> pokemonsJson =
+            jsonResponse['pokedex'] as List<dynamic>;
+
+        final pokemons =
+            pokemonsJson.map((json) => Pokemon.fromJson(json)).toList();
+
+        await pokemonDao.deleteAll(); // Limpa a tabela
+        await pokemonDao.insertAll(
+          pokemons.map(databaseMapper.toPokemonDatabaseEntity).toList(),
+        );
+
+        return pokemons;
+      } else {
+        throw 'Erro de conexão: ${res.statusCode}';
+      }
+    } catch (error) {
+      print('Erro ao pegar pokémons da API: $error');
+
+      // Fallback para o banco de dados se houver erro
+      final pokemonEntities = await pokemonDao
+          .selectAllPokemons(); // Alterado para selectAllPokemons
+      if (pokemonEntities.isEmpty) {
+        print('Nenhum Pokémon encontrado no banco de dados.');
+      } else {
+        print(
+            'Pokémons encontrados no banco de dados: ${pokemonEntities.length}');
+      }
+      final cachedPokemons =
+          pokemonEntities.map(databaseMapper.toPokemon).toList();
+
+      return cachedPokemons;
+    }
+  }
+
+
+
+  

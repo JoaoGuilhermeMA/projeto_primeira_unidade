@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_primeira_unidade/data/repository/pokemon_repositoy_impl.dart';
 import 'dart:math'; // Importar a biblioteca random
-import '../data/database/app_database.dart';
-import '../data/database/database_mapper.dart';
+import 'package:provider/provider.dart'; // Importar o provider
 import '../domain/pokemon.dart';
 import '../data/database/dao/equipe_dao.dart'; // Importar o EquipeDao
 import '../data/database/entity/equipe_entity.dart'; // Importar a entidade EquipeEntity
@@ -24,28 +24,26 @@ class _TelaEncontroDiarioState extends State<TelaEncontroDiario> {
     _randomPokemonFuture = fetchRandomPokemon();
   }
 
+  // Função para buscar Pokémon aleatório usando o repositório
   Future<Pokemon> fetchRandomPokemon() async {
-    final database =
-        await $FloorAppDatabase.databaseBuilder('pokemon_database.db').build();
-    final pokemonDao = database.pokemonDao;
-    final databaseMapper = DatabaseMapper();
+    final repository =
+        Provider.of<PokemonRepositoryImpl>(context, listen: false);
+    final pokemons = await repository.getPokemons(
+        page: 1, limit: 809); // Pegue mais de 1 para randomizar
 
-    final allPokemons = await pokemonDao.selectAllPokemons();
-
-    if (allPokemons.isEmpty) {
-      throw Exception('Nenhum Pokémon encontrado no banco de dados.');
+    if (pokemons.isEmpty) {
+      throw Exception('Nenhum Pokémon encontrado no repositório.');
     }
 
-    final randomIndex = Random().nextInt(allPokemons.length);
-    final randomPokemonEntity = allPokemons[randomIndex];
-
-    return databaseMapper.toPokemon(randomPokemonEntity);
+    // Escolhe aleatoriamente um Pokémon da lista
+    final randomIndex = Random().nextInt(pokemons.length);
+    return pokemons[randomIndex];
   }
 
+  // Função para capturar Pokémon e adicioná-lo à equipe
   Future<void> capturePokemon(Pokemon pokemon) async {
-    final database =
-        await $FloorAppDatabase.databaseBuilder('pokemon_database.db').build();
-    final equipeDao = database.equipeDao; // Obter o EquipeDao
+    // Acessa o EquipeDao através do Provider
+    final equipeDao = Provider.of<EquipeDao>(context, listen: false);
 
     // Verificar a quantidade de Pokémon na equipe
     final currentTeam = await equipeDao.findAllPokemons();

@@ -11,7 +11,7 @@ class PokemonApiClient {
               .add(LogInterceptor(requestBody: true, responseBody: true));
 
   Future<List<PokemonEntity>> fetchPokemons() async {
-    final response = await _dio.get("/pokemons");
+    final response = await _dio.get("/pokedex");
     if (response.statusCode != null && response.statusCode! >= 400) {
       throw NetworkException(
         statusCode: response.statusCode!,

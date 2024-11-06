@@ -23,7 +23,7 @@ class _TelaMeusPokemonsState extends State<TelaMeusPokemons> {
 
   Future<List<Pokemon>> fetchCapturados() async {
     final database =
-        await $FloorAppDatabase.databaseBuilder('pokemon_database.db').build();
+        await $FloorAppDatabase.databaseBuilder('app_database.db').build();
     final equipeDao = database.equipeDao;
     final pokemonDao = database.pokemonDao;
 

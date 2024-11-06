@@ -2,61 +2,46 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:projeto_primeira_unidade/data/database/entity/pokemon_database_entity.dart';
+import 'package:projeto_primeira_unidade/data/network/client/pokemon_api_client.dart';
+import 'package:projeto_primeira_unidade/data/network/network_mapper.dart';
 import '../../domain/pokemon.dart';
 import '../repository/pokemon_repository.dart';
 import '../database/dao/pokemon_dao.dart';
 import '../database/database_mapper.dart';
 
 class PokemonRepositoryImpl implements PokemonRepository {
-  final String baseUrl;
   final PokemonDao pokemonDao;
   final DatabaseMapper databaseMapper;
+  final PokemonApiClient apiClient;
+  final NetworkMapper networkMapper;
 
-  PokemonRepositoryImpl(this.baseUrl, this.pokemonDao, this.databaseMapper);
+  PokemonRepositoryImpl(
+      {required this.pokemonDao,
+      required this.databaseMapper,
+      required this.apiClient,
+      required this.networkMapper});
 
-  Future<List<PokemonDatabaseEntity>> fetchPokemonsPaginated(
-      int limit, int offset) async {
-    return await pokemonDao.selectPokemonsPaginated(limit, offset);
-  }
+  Future<List<Pokemon>> getPokemons(
+      {required int page, required int limit}) async {
+    final offset =
+        (page - 1) * limit; // Corrigido para que a primeira página comece em 0
+    print("Requesting page: $page, limit: $limit, offset: $offset");
 
-  @override
-  Future<List<Pokemon>> fetchPokemons() async {
-    print("entrei aqui");
-    try {
-      final res = await http.get(Uri.parse(baseUrl));
-      if (res.statusCode == HttpStatus.ok) {
-        final Map<String, dynamic> jsonResponse = jsonDecode(res.body);
-        final List<dynamic> pokemonsJson =
-            jsonResponse['pokedex'] as List<dynamic>;
+    final pokemonEntitys =
+        await pokemonDao.selectPokemonsPaginated(limit, offset);
 
-        final pokemons =
-            pokemonsJson.map((json) => Pokemon.fromJson(json)).toList();
-
-        await pokemonDao.deleteAll(); // Limpa a tabela
-        await pokemonDao.insertAll(
-          pokemons.map(databaseMapper.toPokemonDatabaseEntity).toList(),
-        );
-
-        return pokemons;
-      } else {
-        throw 'Erro de conexão: ${res.statusCode}';
-      }
-    } catch (error) {
-      print('Erro ao pegar pokémons da API: $error');
-
-      // Fallback para o banco de dados se houver erro
-      final pokemonEntities = await pokemonDao
-          .selectAllPokemons(); // Alterado para selectAllPokemons
-      if (pokemonEntities.isEmpty) {
-        print('Nenhum Pokémon encontrado no banco de dados.');
-      } else {
-        print(
-            'Pokémons encontrados no banco de dados: ${pokemonEntities.length}');
-      }
-      final cachedPokemons =
-          pokemonEntities.map(databaseMapper.toPokemon).toList();
-
-      return cachedPokemons;
+    print(
+        "Pokémons retornados: ${pokemonEntitys.length}"); // Verifique quantos pokémons foram retornados
+    if (pokemonEntitys.isNotEmpty) {
+      print("\n\nto no if");
+      return databaseMapper.toPokemons(pokemonEntitys);
     }
+    print("to no else");
+    final internetEntity = await apiClient.fetchPokemons();
+    final pokemons = networkMapper.toPokemons(internetEntity);
+    await pokemonDao.insertAll(
+      pokemons.map(databaseMapper.toPokemonDatabaseEntity).toList(),
+    );
+    return pokemons;
   }
 }
