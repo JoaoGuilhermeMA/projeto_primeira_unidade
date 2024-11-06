@@ -12,9 +12,8 @@ class PokemonDetailReleaseScreen extends StatelessWidget {
   Future<void> releasePokemon(BuildContext context) async {
     try {
       print("Tentando liberar Pokémon...");
-      final database = await $FloorAppDatabase
-          .databaseBuilder('pokemon_database.db')
-          .build();
+      final database =
+          await $FloorAppDatabase.databaseBuilder('app_database.db').build();
       final equipeDao = database.equipeDao;
 
       final equipeEntity = EquipeEntity(pokemonId: pokemon.id);
