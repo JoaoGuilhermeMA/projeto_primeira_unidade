@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:projeto_primeira_unidade/domain/pokemon.dart';
 import 'package:projeto_primeira_unidade/data/repository/pokemon_repositoy_impl.dart';
 import './widget/pokemon_item_list.dart';
+import 'pokemon_detalhes.dart'; // Importe a tela de detalhes
 
 class TelaPokedex extends StatefulWidget {
   @override
@@ -55,7 +56,12 @@ class _PokemonListPageState extends State<TelaPokedex> {
             return PokemonListItem(
               pokemon: pokemon,
               onTap: () {
-                // Defina o que deve acontecer quando o Pokémon for clicado
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PokemonDetailScreen(pokemon: pokemon),
+                  ),
+                );
               },
             );
           },
